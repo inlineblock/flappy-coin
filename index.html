@@ -17,6 +17,14 @@
       .source {
         margin-top: 2em;
       }
+      .game canvas {
+        margin: 0 auto;
+      }
+      @media all and (max-height: 480px) {
+        h1 {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -28,7 +36,11 @@
     </div>
     <script type="text/javascript">
       var el = document.getElementsByClassName('game'),
-        game = new Game({el: el[0], width: window.innerWidth});
+        game = new Game({
+          el: el[0],
+          width: Math.min(window.innerWidth, 600),
+          height: Math.min(window.innerHeight, 400)
+        });
       game.start();
     </script>
   </body>
