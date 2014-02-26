@@ -16,6 +16,8 @@
         this.createCoin();
         this.attachInput();
         this.createTimer();
+        this.addPipeRow();
+        this.score = -1;
       },
 
       createCoin: function () {
@@ -32,7 +34,6 @@
 
         this.pipeEnds = this.game.add.group();
         this.pipeEnds.createMultiple(20, 'pipeEnd');
-
       },
 
       createTimer: function () {
