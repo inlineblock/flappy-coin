@@ -39,7 +39,8 @@
         game = new Game({
           el: el[0],
           width: Math.min(window.innerWidth, 600),
-          height: Math.min(window.innerHeight, 400)
+          height: Math.min(window.innerHeight, 400),
+          speed: window.innerWidth < 500 ? 0.8 : 1
         });
       game.start();
     </script>
