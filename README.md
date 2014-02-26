@@ -1,7 +1,7 @@
 flappy-coin
 ===========
 
-Flappy Coin - JavaScript flappy bird like game written with phaser.
+Flappy Coin - JavaScript flappy bird like game written with [phaser](http://phaser.io/).
 
 Run it
 ==
