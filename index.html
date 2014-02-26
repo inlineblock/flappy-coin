@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flappy Coin</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/phaser/1.1.5/phaser.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js" type="text/javascript"></script>
+    <script src="Game.js" type="text/javascript"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flappy Coin</h1>
+    <div class="game"></div>
+    <script type="text/javascript">
+      var el = document.getElementsByClassName('game'),
+        game = new Game({el: el[0], width: window.innerWidth});
+      game.start();
+    </script>
+  </body>
+</html>
