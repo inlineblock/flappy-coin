@@ -41,9 +41,14 @@
       },
 
       attachInput: function () {
-        this.game.input.mouse.mouseDownCallback = this.jump.bind(this);
-        var spaceBar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        spaceBar.onDown.add(this.jump, this);
+        //this.game.input.mouse.mouseDownCallback = this.jump.bind(this);
+
+        // Points do mouse or touch, so dont just do the mouse
+        var pointer1 = this.game.input.addPointer(),
+          spaceBar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+        this.game.input.onDown.add(this.jump, this);// get the point to work
+        spaceBar.onDown.add(this.jump, this); // add the spacebar call back
       },
 
       createScore: function () {
