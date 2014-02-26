@@ -9,3 +9,7 @@ Run it
 $ cd flappy-coin
 $ python -m SimpleHTTPServer
 ```
+
+OR
+
+[Try it online: http://blog.inlineblock.com/flappy-coin/](http://blog.inlineblock.com/flappy-coin/)
