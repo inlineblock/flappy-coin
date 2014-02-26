@@ -8,13 +8,13 @@
         this.game.load.spritesheet('coin', 'images/gold-sprite.png', 40, 40);
         this.game.load.image('pipeBody', 'images/blue-tube.png');
         this.game.load.image('pipeEnd', 'images/blue-end.png');
+        this.attachInput();
       },
 
       create: function() { 
         this.createPipes();
         this.createScore();
         this.createCoin();
-        this.attachInput();
         this.createTimer();
         this.addPipeRow();
         this.score = -1;
