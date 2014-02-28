@@ -36,9 +36,7 @@
 
     createPipes: function () {
       this._pipeGroupNames = [];
-      if (this._currentPipeGroup) {
-        delete this._currentPipeGroup;
-      }
+      this._currentPipeGroup = false;
       this.pipeBodies = this.game.add.group();
       this.pipeBodies.createMultiple(50, 'pipeBody');
 
@@ -110,9 +108,9 @@
         this.nextPipeGroup();
       }
       var closestPipe = this.getTrackerPipe(this._currentPipeGroup);
-      if (closestPipe && closestPipe.x < this.coin.x) {
+      if (this._currentPipeGroup && closestPipe && closestPipe.x < this.coin.x) {
         this.updateScore(1);
-        delete this._currentPipeGroup;
+        this._currentPipeGroup = false;
       }
     },
 
