@@ -3,9 +3,15 @@
   var MainPlay = function MainPlay () {};
   _.extend(MainPlay.prototype, {
 
+    baseSpeeds: {
+      coinGravity: 1000,
+      pipeVelocity: -250,
+      coinVelocity: -385
+    },
+
     preload: function() { 
       this.spriteSize = 40;
-      this.speed = MainPlay.speed || this.speed || 1;
+      this.baseSpeed = MainPlay.speed || this.speed || 1;
       this.game.stage.backgroundColor = '#D0D0D0';
       this.game.load.spritesheet('coin', 'images/gold-sprite.png', 40, 40);
       this.game.load.image('pipeBody', 'images/blue-tube.png');
@@ -17,13 +23,13 @@
       this.createPipes();
       this.createScore();
       this.createCoin();
+      this.resetSpeed();
       this.addPipeRow();
     },
 
     createCoin: function () {
       this.coin = this.game.add.sprite(90, 90, 'coin');
       this.coin.animations.add('spin');
-      this.coin.body.gravity.y = 1000 * this.speed;
       this.coin.body.velocity.y = 0;
       this.coin.animations.play('spin', 11/1.75, true);
     },
@@ -44,15 +50,35 @@
       this.addPipeTimer = this.game.time.events.add(1750, this.addPipeRow, this)
     },
 
+    resetSpeed: function () {
+      this.setSpeed(this.baseSpeed);
+    },
+
+    setExtremeSpeed: function () {
+      this.setSpeed(this.baseSpeed * 1.25);
+    },
+
+    setSpeed: function (multiplier) {
+      this.speed = multiplier;
+      if (this.coin) {
+        this.coin.body.gravity.y = this.baseSpeeds.coinGravity * multiplier; 
+      }
+      this.setPipeVelocity(this.baseSpeeds.pipeVelocity * multiplier);
+    },
+
     attachInput: function () {
       //this.game.input.mouse.mouseDownCallback = this.jump.bind(this);
 
       // Points do mouse or touch, so dont just do the mouse
       var pointer1 = this.game.input.addPointer(),
-        spaceBar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+        spaceBar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR),
+        escape = this.game.input.keyboard.addKey(Phaser.Keyboard.ESC),
+        e = this.game.input.keyboard.addKey(Phaser.Keyboard.E);
 
       this.game.input.onDown.add(this.jump, this);// get the point to work
       spaceBar.onDown.add(this.jump, this); // add the spacebar call back
+      e.onDown.add(this.setExtremeSpeed, this);
+      escape.onDown.add(this.setExtremeSpeed, this);
     },
 
     createScore: function () {
@@ -114,9 +140,13 @@
       this._hasBeenRestarted = true
       this.game.time.events.remove(this.addPipeTimer);
       this.coin.body.velocity.x = 0;
-      this.pipeBodies.setAll('body.velocity.x', 1);
-      this.pipeEnds.setAll('body.velocity.x', 1);
+      this.setPipeVelocity(0);
       window.setTimeout(this.restartGame.bind(this), 1500);
+    },
+
+    setPipeVelocity: function (velocity) {
+      this.pipeBodies.setAll('body.velocity.x', velocity);
+      this.pipeEnds.setAll('body.velocity.x', velocity);
     },
 
     restartGame: function () {
@@ -126,7 +156,7 @@
 
     jump: function () {
       if (!this._hasBeenRestarted && this.coin) {
-        this.coin.body.velocity.y = -385 * this.speed;
+        this.coin.body.velocity.y = this.baseSpeeds.coinVelocity * this.speed;
       }
     },
 
@@ -146,7 +176,7 @@
 
     updatePipeLocation: function (pipe, x, i, groupName) {
       pipe.reset(x, i * pipe.height);
-      pipe.body.velocity.x = -250 * this.speed;
+      pipe.body.velocity.x = this.baseSpeeds.pipeVelocity * this.speed;
       pipe.outOfBoundsKill = true;
       pipe._groupName = groupName;
     },
