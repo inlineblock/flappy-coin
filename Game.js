@@ -17,29 +17,31 @@
       this.createPipes();
       this.createScore();
       this.createCoin();
-      this.createTimer();
       this.addPipeRow();
-      this.score = -1;
     },
 
     createCoin: function () {
       this.coin = this.game.add.sprite(90, 90, 'coin');
       this.coin.animations.add('spin');
-      this.coin.body.gravity.y = 1000;
+      this.coin.body.gravity.y = 1000 * this.speed;
       this.coin.body.velocity.y = 0;
       this.coin.animations.play('spin', 11/1.75, true);
     },
 
     createPipes: function () {
+      this._pipeGroupNames = [];
+      if (this._currentPipeGroup) {
+        delete this._currentPipeGroup;
+      }
       this.pipeBodies = this.game.add.group();
       this.pipeBodies.createMultiple(50, 'pipeBody');
 
       this.pipeEnds = this.game.add.group();
       this.pipeEnds.createMultiple(20, 'pipeEnd');
     },
-
-    createTimer: function () {
-      this.timer = this.game.time.events.loop(1750, this.addPipeRow, this)
+    
+    createAddPipeTimer: function () {
+      this.addPipeTimer = this.game.time.events.add(1750, this.addPipeRow, this)
     },
 
     attachInput: function () {
@@ -54,7 +56,7 @@
     },
 
     createScore: function () {
-      this.score = -1;
+      this.score = 0;
       this.scoreLabel = this.game.add.text(20, 20, "0", {
         font: '48px Helvetica',
         className: 'score-label',
@@ -64,7 +66,7 @@
 
     updateScore: function (score) {
       this.score += score;
-      this.scoreLabel.content = Math.max(this.score, 0).toFixed(0);
+      this.scoreLabel.content = this.score.toFixed(0);
     },
     
     update: function() {
@@ -74,6 +76,35 @@
         this.game.physics.overlap(this.coin, this.pipeBodies, this.gameOver, null, this);
         this.game.physics.overlap(this.coin, this.pipeEnds, this.gameOver, null, this);
       }
+      this.checkForScore();
+    },
+
+    checkForScore: function () {
+      if (!this._currentPipeGroup) {
+        this.nextPipeGroup();
+      }
+      var closestPipe = this.getTrackerPipe(this._currentPipeGroup);
+      if (closestPipe && closestPipe.x < this.coin.x) {
+        this.updateScore(1);
+        delete this._currentPipeGroup;
+      }
+    },
+
+    nextPipeGroup: function () {
+      if (this._pipeGroupNames.length) {
+        this._currentPipeGroup = this._pipeGroupNames.shift();
+      }
+    },
+
+    getTrackerPipe: function (groupName) {
+      var trackerPipe;
+      if (!this._trackerPipe || this._trackerPipe._groupName != groupName) {
+        trackerPipe = this.pipeEnds.iterate('_groupName', groupName, Phaser.Group.RETURN_CHILD);
+        this._trackerPipe = trackerPipe;
+      } else {
+        trackerPipe = this._trackerPipe;
+      }
+      return trackerPipe;
     },
 
     gameOver: function (sprite) {
@@ -81,7 +112,7 @@
         return true;
       }
       this._hasBeenRestarted = true
-      this.game.time.events.remove(this.timer);
+      this.game.time.events.remove(this.addPipeTimer);
       this.coin.body.velocity.x = 0;
       this.pipeBodies.setAll('body.velocity.x', 1);
       this.pipeEnds.setAll('body.velocity.x', 1);
@@ -95,47 +126,52 @@
 
     jump: function () {
       if (!this._hasBeenRestarted && this.coin) {
-        this.coin.body.velocity.y = -385;
+        this.coin.body.velocity.y = -385 * this.speed;
       }
     },
-    
-    addPipeBody: function (i, pipeEnd) {
+
+    addPipeBody: function (x, i, groupName) {
       var pipe = this.pipeBodies.getFirstDead();
       if (pipe) {
-        this.updatePipeLocation(pipe, i);
+        this.updatePipeLocation(pipe, x, i);
       }
     },
 
-    addPipeEnd: function (i) {
+    addPipeEnd: function (x, i, groupName) {
       var pipe = this.pipeEnds.getFirstDead();
       if (pipe) {
-        this.updatePipeLocation(pipe, i);
+        this.updatePipeLocation(pipe, x, i, groupName);
       }
     },
 
-    updatePipeLocation: function (pipe, i) {
-      pipe.reset(this.game.width, i * pipe.height);
+    updatePipeLocation: function (pipe, x, i, groupName) {
+      pipe.reset(x, i * pipe.height);
       pipe.body.velocity.x = -250 * this.speed;
       pipe.outOfBoundsKill = true;
+      pipe._groupName = groupName;
     },
 
     addPipeRow: function () {
       var pipeFit = Math.ceil(this.game.height / 45),
-        hole = Math.floor((Math.random() * (pipeFit - 3)) + 1.5);
+        hole = Math.floor((Math.random() * (pipeFit - 3)) + 1.5),
+        pipeGroup = _.uniqueId('pipe');
+
+      this._pipeGroupNames.push(pipeGroup);
+
       _(pipeFit).times(function (i) {
         if (i != hole && i != (hole+1) && i != (hole -1)) {
           if (i == (hole - 2) || i == (hole + 2)) {
-            this.addPipeEnd(i);
+            this.addPipeEnd(this.game.width, i, pipeGroup);
           } else {
-            this.addPipeBody(i);
+            this.addPipeBody(this.game.width, i, pipeGroup);
           }
         }
       }, this);
-      this.updateScore(1);
+      this.createAddPipeTimer();
     },
+
     destroy: function () {
       this._hasBeenRestarted = true;
-      console.log('destroy');
     }
   });
 
